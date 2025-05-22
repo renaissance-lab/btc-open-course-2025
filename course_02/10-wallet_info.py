@@ -91,7 +91,10 @@ class BitcoinAddressInfo:
     
 def main():
     # 测试网地址示例
-    test_address = "msmkSKovoadUpdjbKMiancy6PnKowe4VP1"
+    #     # Legacy 地址: mfkSgFzcijcub1AXuvLMhHbXY5Wodyy5z1
+    # SegWit 地址: tb1qq2x3nt3zzqz7rxgxf03m4tj5eckywehaklggph
+    # Taproot 地址: tb1p9q80mtqns48e8dm4gkuq0n5tx9zdwqqqh9skyagqrtq3q7jvdqfqe02xas
+    test_address = "tb1p9q80mtqns48e8dm4gkuq0n5tx9zdwqqqh9skyagqrtq3q7jvdqfqe02xas"
     
     # 创建查询对象
     btc_info = BitcoinAddressInfo()
