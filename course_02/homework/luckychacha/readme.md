@@ -2,25 +2,27 @@
 
     - Legacy地址
         - 25字节
-        - 34个字符
+        - 使用 Base58Check 编码，编码后 34 个字符
         - 前缀
             - 主网：1
             - 测试网：m
 
     - SegWit地址
         - 21字节
-        - 42~46个字符
+        - 使用 Bech32 编码，编码后 42~46 个字符
         - 前缀
             - 主网：bc1q
             - 测试网：tb1q
     - Taproot地址
         - 33字节
-        - 58~62个字符
+        - 使用 Bech32m 编码，编码后 58~62 个字符
         - 前缀
             - 主网：bc1p
             - 测试网：tb1p
 
-    > 结论：Legacy地址最短，Taproot地址最长，SegWit地址介于两者之间。
+    > 结论：
+    > 1. 按原始数据大小： SegWit < Legacy < Taproot
+    > 2. 按编码地址长度： Legacy < SegWit < Taproot
 
 
     ```
