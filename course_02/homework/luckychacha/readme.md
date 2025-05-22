@@ -50,5 +50,5 @@
         - 脚本长度：34 字节
         - 操作码数量：1个操作码 + 数据
 
-    > 结论：Legacy锁定脚本最短，Taproot锁定脚本最长，SegWit锁定脚本介于两者之间。
+    > 结论：Legacy 锁定脚本最复杂，SegWit 和 Taproot 锁定脚本结构简单，只有一个操作码和数据，其中 SegWit 锁定脚本比 Taproot 锁定脚本更短，因为 Segwit 的数据是20字节公钥哈希，而 Taproot 的数据是32字节x-only公钥。
 
