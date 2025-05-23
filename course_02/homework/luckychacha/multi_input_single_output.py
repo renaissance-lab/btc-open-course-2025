@@ -80,7 +80,7 @@ def main():
     
     # 签名所有输入
     sig1 = from_private_key.sign_input(tx, 0, legacy_script)
-    sig2 = from_private_key.sign_segwit_input(tx, 1, segwit_script, utxos_script_pubkeys[1])
+    sig2 = from_private_key.sign_segwit_input(tx, 1, segwit_script, amounts[1])
     # sig3 = from_private_key.sign_taproot_input(tx, 2, [taproot_script], [taproot_amount])
     sig3 = from_private_key.sign_taproot_input(tx, 2, utxos_script_pubkeys, amounts)
     
