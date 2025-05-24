@@ -1,12 +1,16 @@
 #### 1. 观察legacy、segwit和taproot 地址的长短，说说他们有什么区别
 
+>  私钥（WIF）：cVgbLBMymtebKVGoriSVWxEBahbGvvx3tuKJftGpaJBcfjujZd4C
+>
+>  公钥（HEX）：02791c756a773e606ab0e05dbdb453dec465d0796b94ceb536a2fa19ddca9efef4
+>
 >  === 不同类型的地址 ===  
 >
->  传统Legacy地址: msmkSKovoadUpdjbKMiancy6PnKowe4VP1  
+>  传统Legacy地址: n4juXXS637FKJy9zJsbrCbTLvdQLRZCjST
 >
->  SegWit地址: tb1qsekanny2d9fapa8538ms6ep0c0aqsjhcl3kshl  
+>  SegWit地址: tb1ql67l67sy6zn6d2ztf75chu3h498ydupplwscpt
 >
->  Taproot地址: tb1pc3qlpa5yl9s8a3qtkvwe6akgqa5s4qfwdn8ch4u4pd6um9wfkukqc48z3q
+>  Taproot地址: tb1p484vwajatgstnx82fssqtprljpj9g3ruzj9h8hx03sjnggjcpxesjzzjpg
 
 
 

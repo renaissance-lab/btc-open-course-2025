@@ -5,40 +5,6 @@ from bitcoinutils.script import Script
 from bitcoinlib.encoding import to_bytes
 import requests
 
-import requests
-
-def get_utxo(address, min_value):
-    # 示例地址 tb1p9u76qgdsay233juzztk5xtn8kelmxswut2029c0s27stxcr6g59qupu0cw
-    url = f"https://api.blockcypher.com/v1/btc/test3/addrs/{address}?unspentOnly=true"
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        data = response.json()
-        utxos = data.get('txrefs', [])  # BlockCypher API返回的UTXO在'txrefs'字段
-
-        if not utxos:
-            print("该地址没有未花费的交易输出（UTXO）。")
-            return None
-
-        # 遍历UTXO列表
-        for utxo in utxos:
-            balance = utxo['value']  # UTXO的余额字段是'value'
-            print(f"UTXO余额: {balance}")
-            if balance >= min_value:
-                return utxo
-
-        print(f"没有找到余额大于或等于{min_value}的UTXO。")
-        return None
-    else:
-        print(f"请求失败，状态码：{response.status_code}")
-        # 示例utxo
-        utxo = {
-            'tx_hash': '0e3e2357e806b6cdb1f70b54c3a3a17b6714ee1f0e68bebb44a74b1efd512098',  
-            'tx_output_n': 0,
-            'value': 600
-        }
-        return None
-
 # 三个输入地址到一个输出地址的转账
 def three_input_address_transaction():
         private_key_wif = "cQbmoSHZ9jWnfyBoY82ZqZht9taid82beJtAYpRcwKaDSxizd37a"
