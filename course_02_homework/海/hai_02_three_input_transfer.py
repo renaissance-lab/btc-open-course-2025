@@ -2,52 +2,40 @@ from bitcoinutils.setup import setup
 from bitcoinutils.keys import PrivateKey, P2wpkhAddress, P2pkhAddress, P2trAddress
 from bitcoinutils.transactions import Transaction, TxInput, TxOutput, TxWitnessInput
 from bitcoinutils.script import Script
-from bitcoinlib.encoding import to_bytes
 import requests
 
 # 三个输入地址到一个输出地址的转账
 def three_input_address_transaction():
-        private_key_wif = "cQbmoSHZ9jWnfyBoY82ZqZht9taid82beJtAYpRcwKaDSxizd37a"
+        setup("testnet")
+
+        private_key_wif = "cVgbLBMymtebKVGoriSVWxEBahbGvvx3tuKJftGpaJBcfjujZd4C"
         private_key = PrivateKey(private_key_wif)
 
         # 测试网地址
-        from_legacy_address = 'msmkSKovoadUpdjbKMiancy6PnKowe4VP1'  # Legacy地址
-        from_segwit_address = 'tb1qsekanny2d9fapa8538ms6ep0c0aqsjhcl3kshl'  # SegWit地址
-        from_taproot_address = 'tb1pc3qlpa5yl9s8a3qtkvwe6akgqa5s4qfwdn8ch4u4pd6um9wfkukqc48z3q'  # Taproot地址
+        from_legacy_address = 'n4juXXS637FKJy9zJsbrCbTLvdQLRZCjST'  # Legacy地址
+        from_segwit_address = 'tb1ql67l67sy6zn6d2ztf75chu3h498ydupplwscpt'  # SegWit地址
+        from_taproot_address = 'tb1phsw7yj630jtay3c5vmf3mkv7kdja5889m0lmjz0h0ks8xusk03usj0xlnp'  # Taproot地址
         
-        to_legacy_address = 'mzCyg57PeU6KfJ1rxzcQ6BEgJaemosj8pU'
+        to_segwit_address = 'tb1q7aum99m2j40x3gq9s056sepzjrs84py3ccnwsd'
 
-        trans_value = 500  # 每个地址转出1000聪
-
-        # 构建交易输入
-        legacy_utxo = get_utxo(from_legacy_address, trans_value)
-        segwit_utxo = get_utxo(from_segwit_address, trans_value)
-        taproot_utxo = get_utxo(from_taproot_address, trans_value)
+        trans_value1 = 800
+        trans_value2 = 3500
+        trans_value3 = 4000
+        amounts = [trans_value1, trans_value2, trans_value2]
+        trans_total = trans_value1 + trans_value2 + trans_value3 - 1000
 
         txins = []
-        if legacy_utxo:
-            legacy_txin = TxInput(legacy_utxo['tx_hash'], legacy_utxo['tx_output_n'])
-            txins.append(legacy_txin)
-        if segwit_utxo:
-            segwit_txin = TxInput(segwit_utxo['tx_hash'], segwit_utxo['tx_output_n'])
-            txins.append(segwit_txin)
-        if taproot_utxo:
-            taproot_txin = TxInput(taproot_utxo['tx_hash'], taproot_utxo['tx_output_n'])
-            txins.append(taproot_txin)
+        legacy_txin = TxInput('c020c39014074697279a94c6f2ac67005d2e5fcbb7cee5cff275961979e5ed75', 0)
+        txins.append(legacy_txin)
+    
+        segwit_txin = TxInput('5b35ddb78dc508852cf378f8fa5966afba4b59ae491d374def2df2ea1788341d', 0)
+        txins.append(segwit_txin)
 
-        output_amount = trans_value * len(txins)
-
-        """
-        多个输入地址到一个输出地址的转账
-        ！！！不理解的地方：
-        1.多交易构建过程
-        2.多个签名设置
-        3.估计费用字段大小是分别计算每个输入，还是一起算？
-        
-        """
+        taproot_txin = TxInput('708bef6d8b2fe140210454d4dea5a18dc67c10ab0371b173dd7f6374323d8640', 0)
+        txins.append(taproot_txin)
 
         # 构建交易输出
-        txout = TxOutput(output_amount, P2pkhAddress(to_legacy_address).to_script_pub_key())
+        txout = TxOutput(trans_total, P2wpkhAddress(to_segwit_address).to_script_pub_key())
 
         # 构建交易
         tx = Transaction(inputs=txins, outputs=[txout], has_segwit=True)
@@ -56,37 +44,27 @@ def three_input_address_transaction():
         print(tx.serialize())
 
         # Legacy地址签名
-        legacy_script_code = Script(['OP_DUP', 'OP_HASH160', to_bytes(from_legacy_address), 'OP_EQUALVERIFY', 'OP_CHECKSIG'])
-        sig = private_key.sign_input(tx, 0, legacy_script_code.get_script(), trans_value)
-        legacy_txin.script_sig = Script([sig, P2pkhAddress(from_legacy_address).to_script_pub_key().to_hex()])
+        legacy_script = P2pkhAddress(from_legacy_address).to_script_pub_key()
+        legacy_sig = private_key.sign_input(tx, 0, legacy_script)
 
         # SegWit地址签名
-        segwit_script_code = Script(['OP_0', to_bytes(from_segwit_address)])
-        sig = private_key.sign_segwit_input(tx, 1, segwit_script_code, trans_value)
-        public_key = P2wpkhAddress(from_segwit_address).to_public_key().to_hex()
-        tx.witnesses.append([sig, public_key])
+        segwit_script = P2wpkhAddress(from_segwit_address).to_script_pub_key()
+        segsit_sig = private_key.sign_segwit_input(tx, 1, segwit_script, trans_value2)
 
         # Taproot地址签名
-        taproot_script_code = Script(['OP_1', to_bytes(from_taproot_address)])
-        sig = private_key.sign_taproot_input(tx, 2, taproot_script_code, trans_value)
-        public_key = P2trAddress(from_taproot_address).to_public_key().to_hex()
-        tx.witnesses.append([sig, public_key])
+        taproot_script = P2trAddress(from_taproot_address).to_script_pub_key()
+        taproot_sig = private_key.sign_taproot_input(tx, 2, [legacy_script, segwit_script, taproot_script], amounts)
+
+        tx.witnesses = []
+        tx.witnesses.append(TxWitnessInput([]))
+        tx.witnesses.append(TxWitnessInput([segsit_sig]))
+        tx.witnesses.append(TxWitnessInput([taproot_sig]))
+
+        legacy_txin.script_sig = Script([legacy_sig, private_key.get_public_key().to_hex()])
 
         # 打印签名后的交易
         print("\n 签名后的交易：")
-        print(tx.serialize())()
+        print(tx.serialize())
 
 if __name__ == "__main__":
-
-    """
-    多个输入地址到一个输出地址的转账
-    ！！！不理解的地方：
-    1.多交易构建过程
-    2.多个签名设置
-    3.估计费用字段大小是分别计算每个输入，还是一起算？
-    4.签名提示索引越界是什么意思
-    
-    """
-
-    # === 这个例子还不能正确运行
     three_input_address_transaction()
