@@ -11,7 +11,7 @@ from typing import List, Dict
  === 不同类型地址 === 
 Legacy地址: mkjTqSND94suFaZhyFiMfWug4Mq8mX5JSU
 Segwit地址 *: tb1q8ymy0dkkpyvhxd3v7axx58k00hzuxjde4rkqdp
-Taproot地址: tb1ptstv5wrep48f5jzpcajxj3tgksydey6m40alzry0v9q6lx63h2kq9qhtum
+Taproot地址 **: tb1ptstv5wrep48f5jzpcajxj3tgksydey6m40alzry0v9q6lx63h2kq9qhtum
 '''
 def generate_small_utxos():
     setup('testnet')
@@ -62,7 +62,7 @@ def generate_small_utxos():
     print(tx.serialize())
 
     # 构建输入脚本
-    input_script = from_segwit_address.to_script_pub_key()
+    input_script = from_public_key.get_address().to_script_pub_key()
     # 签名交易
     sig = from_private_key.sign_segwit_input(tx, 0, input_script, 5000)
     
@@ -135,17 +135,56 @@ def generate_utxo_combinations(target_amount: int, utxo_pool: List[Dict], strate
     else:
         return [selected]
 
+# 生成txin结构
+def create_txins(utxos):
+    txins = []
+    for utxo in utxos:
+        txins.append(TxInput(utxo['txid'], utxo['vout']))
+
+    return txins
+
+# 生成Witness
+def create_witnesses(utxos, tx, private_key=""):
+    witnesses = []
+    key = PrivateKey(private_key)
+    pub_key = key.get_public_key()
+    for i, utxo in enumerate(utxos):
+        input_script = pub_key.get_address().to_script_pub_key()
+        sig = key.sign_segwit_input(tx, i, input_script, utxo['value'])
+        witnesses.append(TxWitnessInput([sig, pub_key.to_hex()]))
+    return witnesses
+
 def multi_utxo_transfer_by_smart_generator():
-    utxos_request = request_utxo("tb1ql67l67sy6zn6d2ztf75chu3h498ydupplwscpt")
-    utoxs_gen = generate_utxo_combinations(7000, utxos_request)
+    from_address = "tb1q8ymy0dkkpyvhxd3v7axx58k00hzuxjde4rkqdp"
+    to_address = "tb1ptstv5wrep48f5jzpcajxj3tgksydey6m40alzry0v9q6lx63h2kq9qhtum"
+    transfer_count = 1600
+    fee = 400
+
+    utxos_request = request_utxo(from_address)
+    utoxs_gen = generate_utxo_combinations(transfer_count + fee, utxos_request)
 
     # 打印生成的UTXO组合
-    for utxo in utoxs_gen:
-        print(utxo)
+    print(f"{len(utoxs_gen[0])}个utxo")
+    for utxo in utoxs_gen[0]:
+        print(f"\nutxo: {utxo}")
 
+    txins = create_txins(utoxs_gen[0])
+
+    # 将发送方的金额返回给自己
+    txout = TxOutput(transfer_count, P2trAddress(to_address).to_script_pub_key())
+
+    # 构建交易
+    tx = Transaction(txins, [txout], has_segwit=True)
+
+    print("\n 未签名的交易：")
+    print(tx.serialize())
+
+    witnesses = create_witnesses(utoxs_gen[0], tx, private_key="cRAMZzQWNDeQRwundLs2zkyDjxKwHBFtLw63UMn8u6E8sVUhPvzQ")
+    tx.witnesses = []
+    tx.witnesses = witnesses
+
+    print("\n 已签名的交易:")
+    print(tx.serialize())
     
-
 if __name__ == "__main__":
-    #generate_small_utxos()
-
     multi_utxo_transfer_by_smart_generator()
