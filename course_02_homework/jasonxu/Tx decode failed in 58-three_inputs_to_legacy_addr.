@@ -1,4 +1,0 @@
-广播失败: sendrawtransaction RPC error: {"code":-22,"message":"TX decode failed. Make sure the tx has at least one input."}
-
-https://github.com/karask/python-bitcoin-utils/blob/master/examples/spend_multi_input_p2tr_and_p2pkh.py
-上面的例子中tx.set_witness方法似乎不存在，改成tx.witnesses.append有同样的错误提示

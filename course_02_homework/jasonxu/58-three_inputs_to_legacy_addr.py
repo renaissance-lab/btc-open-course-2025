@@ -47,6 +47,9 @@ def main():
     script_pubkey2 = segwit_addr.to_script_pub_key()
     script_pubkey3 = taproot_addr.to_script_pub_key()
     utxos_script_pubkeys = [script_pubkey1, script_pubkey2, script_pubkey3]
+    segwit_script_pubkey = from_private_key.get_public_key().get_address().to_script_pub_key()
+    print("\nsegwit_pub_key:" + script_pubkey2.to_hex())
+    print("\nscript_pub_key:" + segwit_script_pubkey.to_hex())
 
     toAddress = legacy_addr
 
@@ -71,13 +74,14 @@ def main():
     # to create the digest message to sign in taproot we need to
     # pass all the utxos' scriptPubKeys and their amounts
     sig1 = from_private_key.sign_input(tx, 0, utxos_script_pubkeys[0])
-    sig2 = from_private_key.sign_segwit_input(tx, 1, utxos_script_pubkeys[1], amounts[1])
+    sig2 = from_private_key.sign_segwit_input(tx, 1, segwit_script_pubkey, amounts[1])
     sig3 = from_private_key.sign_taproot_input(tx, 2, utxos_script_pubkeys, amounts)
 
     #set witness sets the witness at a particular input index
     public_key = from_private_key.get_public_key().to_hex()
     txin1.script_sig = Script([sig1, public_key])
     txin2.script_sig = Script([]) 
+    tx.witnesses.append(TxWitnessInput([]))
     tx.witnesses.append(TxWitnessInput([sig2, public_key]))
     tx.witnesses.append(TxWitnessInput([sig3]))
     #tx.set_witness(1, TxWitnessInput([sig2, public_key]))
@@ -92,28 +96,29 @@ def main():
     print("\nSize:", tx.get_size())
     print("\nvSize:", tx.get_vsize())
 
-    # fee = int(tx.get_vsize() *1.05)
-    # print(f"重新计算手续费: {fee}")
-    # txOut = TxOutput(sum(amounts)-fee, toAddress.to_script_pub_key())
-    # tx = Transaction([txin1, txin2, txin3], [txOut], has_segwit=True)   
+    fee = int(tx.get_vsize() *1.05)
+    print(f"重新计算手续费: {fee}")
+    txOut = TxOutput(sum(amounts)-fee, toAddress.to_script_pub_key())
+    tx = Transaction([txin1, txin2, txin3], [txOut], has_segwit=True)   
 
-    # sig1 = from_private_key.sign_input(tx, 0, utxos_script_pubkeys[0])
-    # sig2 = from_private_key.sign_segwit_input(tx, 1, utxos_script_pubkeys[1], amounts[1])
-    # sig3 = from_private_key.sign_taproot_input(tx, 2, utxos_script_pubkeys, amounts)
+    sig1 = from_private_key.sign_input(tx, 0, utxos_script_pubkeys[0])
+    sig2 = from_private_key.sign_segwit_input(tx, 1, segwit_script_pubkey, amounts[1])
+    sig3 = from_private_key.sign_taproot_input(tx, 2, utxos_script_pubkeys, amounts)
 
-    # #set witness sets the witness at a particular input index
-    # txin1.script_sig = Script([sig1, public_key])
-    # txin2.script_sig = Script([]) 
-    # tx.witnesses.append(TxWitnessInput([sig2, public_key]))
-    # tx.witnesses.append(TxWitnessInput([sig3]))
+    #set witness sets the witness at a particular input index
+    tx.witnesses.append(TxWitnessInput([]))
+    txin1.script_sig = Script([sig1, public_key])
+    tx.witnesses.append(TxWitnessInput([sig2, public_key]))
+    txin2.script_sig = Script([]) 
+    tx.witnesses.append(TxWitnessInput([sig3]))
 
-    # print("\nTxId:", tx.get_txid())
-    # print("\nTxwId:", tx.get_wtxid())
-    # print(f"交易大小: {tx.get_size()} bytes")
-    # print(f"虚拟大小: {tx.get_vsize()} vbytes")
+    print("\nTxId:", tx.get_txid())
+    print("\nTxwId:", tx.get_wtxid())
+    print(f"交易大小: {tx.get_size()} bytes")
+    print(f"虚拟大小: {tx.get_vsize()} vbytes")
     
     signed_tx = tx.serialize()
-
+    print("\nRaw signed transaction:\n" + signed_tx)
 
     # 6. 广播交易
     print("\n广播交易...")
