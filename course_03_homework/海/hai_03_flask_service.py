@@ -1,10 +1,12 @@
 import os
 
-from flask import Flask
+from flask import Flask,jsonify
 
 from bitcoinrpc.authproxy import AuthServiceProxy, JSONRPCException
+from flask_cors import CORS
 
 app = Flask (__name__)
+CORS(app)
 
 rpc_connection = AuthServiceProxy("http://dh:Server123@127.0.0.1:18332")
 
@@ -13,6 +15,7 @@ def hello():
     return "hello bitcoin!"
 
 @app.route("/tx/getblockchaininfo", methods=['GET'])
+# 用于获取区块链信息
 def get_blockchain_info():
     try:
         blockchian_info = rpc_connection.getblockchaininfo()
@@ -25,17 +28,26 @@ def get_blockchain_info():
     except Exception as e:
         return f"其他错误: {e}"
 
-# 测试tx 
-# 02000000000101113f5c75d93510fffd0590e8d35833ee2a0bfeef28f124de12872762644505c30000000000ffffffff01ac0d000000000000160014febdfd7a04d0a7a6a84b4fa98bf237a94e46f0210140fb9ca694894ab88246436cbd37ebf321884884b46dc1f7f15253ea79f1c7bb7ded524a07d1571efa9ea94b5c1ed75db7607f6ed5edbe7e2135594e4bc0d5e61c00000000
+
 @app.route("/tx/broadcast/<raw_tx_hex>", methods=['GET'])
 def broadcast(raw_tx_hex):
     try:
         # 发送交易到网络
+        rpc_connection = AuthServiceProxy("http://dh:Server123@127.0.0.1:18332")
         tx_id = rpc_connection.sendrawtransaction(raw_tx_hex)
-        return f"交易已广播！TXID: {tx_id}"
+        response = jsonify({
+            "status": "success",
+            "message": "交易已广播！",
+            "txid": tx_id
+        })
+        return response
     
     except JSONRPCException as e:
-        return f"广播失败: {e}"
+        response = jsonify({
+            "status": "error",
+            "message": f"{e}"
+        })
+        return response
 
 if __name__ == '__main__':
     prefix = os.getenv("BASE")
