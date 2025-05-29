@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="759a9e62-360f-4bcd-a9af-3bc9e0395cf4" name="更改" comment="Add files via upload" />
+    <list default="true" id="759a9e62-360f-4bcd-a9af-3bc9e0395cf4" name="更改" comment="Add files via upload">
+      <change afterPath="$PROJECT_DIR$/course_03_preview/第三次作业/1.智能转账.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/course_03_preview/第三次作业/2.交易广播.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/course_03_preview/第三次作业/3.脚本花费.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,7 +45,8 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "D:/lianxi/btc-open-course-2025",
+    "git-widget-placeholder": "lili",
+    "last_opened_file_path": "D:/lianxi/btc-open-course-2025/course_03_preview",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -72,6 +78,9 @@
       <updated>1747909637316</updated>
       <workItem from="1747909638673" duration="524000" />
       <workItem from="1747910189106" duration="380000" />
+      <workItem from="1747910584085" duration="219000" />
+      <workItem from="1747910814941" duration="1480000" />
+      <workItem from="1748489887184" duration="304000" />
     </task>
     <task id="LOCAL-00001" summary="Add files via upload">
       <option name="closed" value="true" />
@@ -81,7 +90,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747910040620</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Add files via upload">
+      <option name="closed" value="true" />
+      <created>1747910657132</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1747910657132</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
