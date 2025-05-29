@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>广播比特币交易</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9e9e9;
+            border-radius: 4px;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>比特币交易广播</h1>
+        <p>输入你的交易 HEX，然后点击广播按钮。</p>
+
+        <input type="text" id="txHex" placeholder="输入交易 HEX" />
+        <button onclick="broadcastTransaction()">广播交易</button>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        async function broadcastTransaction() {
+            const txHex = document.getElementById("txHex").value;
+            const messageElement = document.getElementById("message");
+
+            if (!txHex) {
+                messageElement.textContent = "请输入有效的交易 HEX!";
+                messageElement.classList.add("error");
+                return;
+            }
+
+            // 清空上次的消息
+            messageElement.textContent = "";
+            messageElement.classList.remove("error", "success");
+
+            try {
+                // 发起广播请求
+                const response = await fetch("https://mempool.space/api/tx", {
+                    method: "POST",
+                        headers: {
+        "Content-Type": "text/plain" // 设置正确的请求头
+    },
+                    body: txHex // 发送的交易 HEX 数据
+                });
+
+
+                        // 打印出原始响应内容
+                const responseText = await response.text();
+
+
+                if (response.ok) {
+                    messageElement.textContent = `交易广播成功，TxID: ${responseText}`;
+                    messageElement.classList.add("success");
+                } else {
+                    messageElement.textContent = `广播失败: ${responseText}`;
+                    messageElement.classList.add("error");
+                }
+            } catch (error) {
+                messageElement.textContent = `发生错误: ${responseText}`;
+                messageElement.classList.add("error");
+            }
+        }
+    </script>
+
+</body>
+</html>
