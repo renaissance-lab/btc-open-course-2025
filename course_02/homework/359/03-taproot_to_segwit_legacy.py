@@ -2,6 +2,18 @@
 Taproot到SegWit和Legacy地址的比特币交易
 
 本文件实现从Taproot地址向SegWit和Legacy地址发送比特币的交易。
+
+Legacy地址: mgMzeGduaTgTAywnq9BND2Ard4iSPLxqoW
+SegWit地址: tb1qp9r90d87wlwt9730r4u58gm3qz8wjw4ha2jdp8
+Taproot地址: tb1p52hq8twkndu4awmex58xykjv8xj2c467j0r2dvj8y89ndfme09kss2w7ya
+
+私钥(HEX): 2caadc4e587783ad34753f109fae2de63d71a2993f3c258cc4d5fc647da8a3a5
+私钥(WIF): cP5XejkeNHytd3H8mNBj73N1c6Ve7pYi17kPC7nmd3ricXVZYnz6
+公钥(压缩),字节: b'\x03R\x94\x95h\xd4<\xa8~\xf0\xa00\xf9\xc4+\xb2\xbf\xdeX\xe0\xc4\xae\xba\x03U\xfd\xcbQ\xc5\x05s\x00m'
+公钥(压缩): 0352949568d43ca87ef0a030f9c42bb2bfde58e0c4aeba0355fdcb51c50573006d
+公钥(未压缩): 0452949568d43ca87ef0a030f9c42bb2bfde58e0c4aeba0355fdcb51c50573006d2515834fc3c31813e37d10ca7e96183329c6c8b3379d741522a620416dc48923
+
+https://mempool.space/testnet/tx/c05341be4dcb146f96c11da93768eb2473bcbf4eaeda182ae0805e75130e80bc
 """
 
 from bitcoinutils.setup import setup
@@ -15,7 +27,7 @@ def main():
     setup('testnet')
     
     # 发送方信息（Taproot地址）
-    from_private_key = PrivateKey('cPeon9fBsW2BxwJTALj3hGzh9vm8C52Uqsce7MzXGS1iFJkPF4AT')
+    from_private_key = PrivateKey('cP5XejkeNHytd3H8mNBj73N1c6Ve7pYi17kPC7nmd3ricXVZYnz6')
     from_pub = from_private_key.get_public_key()
     from_address = from_pub.get_taproot_address()
     
@@ -31,13 +43,13 @@ def main():
     
     # 创建交易输入
     txin = TxInput(
-        '69d286af55274bdfaed7636cfcee6ddee313e0986f6791f2e84c7bf479ffa1e4',  # 前一个交易的ID
-        0  # vout
+        '8dadead937481f1bfa41dd5f07c4ca538b3be9b03e600ae803f4a5d8ad82e0b2',  # 前一个交易的ID
+        1  # vout
     )
     
     # 计算金额（单位：BTC）
-    total_input = 0.00000400  # 输入金额
-    fee = 0.00000100         # 手续费
+    total_input = 0.00121110  # 输入金额
+    fee = 0.00000200         # 手续费
     amount_to_send = (total_input - fee) / 2  # 平分发送金额到两个地址
     
     # 创建交易输出
