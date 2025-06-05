@@ -1,0 +1,320 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>比特币交易广播</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #f7931a;
+            text-align: center;
+        }
+        .container {
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            background-color: #f7931a;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #e78008;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .hidden {
+            display: none;
+        }
+        .info {
+            background-color: #e2f3f7;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #f7931a;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 0 4px 4px 4px;
+            margin-bottom: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>比特币交易广播</h1>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'broadcast-tab')">广播交易</div>
+            <div class="tab" onclick="openTab(event, 'node-tab')">节点信息</div>
+        </div>
+        
+        <div id="broadcast-tab" class="tab-content active">
+            <div class="info">
+                <p>这个工具允许你通过比特币测试网广播已签名的交易。</p>
+                <p>请在下方文本框中粘贴已签名的交易十六进制数据。</p>
+            </div>
+            
+            <form id="broadcast-form">
+                <div style="margin-bottom: 15px;">
+                    <label for="node-type" style="display: block; margin-bottom: 5px; font-weight: bold;">选择节点类型：</label>
+                    <select id="node-type" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="auto">自动选择 (优先本地节点)</option>
+                        <option value="local">仅使用本地节点</option>
+                        <option value="public">仅使用公共API</option>
+                    </select>
+                </div>
+                <textarea id="tx-hex" placeholder="在此粘贴已签名的交易十六进制数据..."></textarea>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1;">广播交易</button>
+                    <button type="button" id="decode-btn" style="flex: 1; background-color: #6c757d;">解析交易</button>
+                </div>
+            </form>
+            
+            <div id="result" class="result hidden"></div>
+            <div id="decode-result" class="result hidden" style="background-color: #f8f9fa; border: 1px solid #ddd; color: #212529;"></div>
+        </div>
+        
+        <div id="node-tab" class="tab-content">
+            <div class="info">
+                <p>这里显示连接的比特币节点信息。</p>
+            </div>
+            <div id="node-info" style="background-color: #f8f9fa; border: 1px solid #ddd; padding: 15px; border-radius: 4px;">
+                <p>正在加载节点信息...</p>
+            </div>
+            <button id="refresh-node-info" style="margin-top: 10px;">刷新信息</button>
+        </div>
+    </div>
+
+    <script>
+        // 标签页切换功能
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].className = tabcontent[i].className.replace(" active", "");
+            }
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).className += " active";
+            evt.currentTarget.className += " active";
+            
+            // 如果切换到节点信息标签，加载节点信息
+            if (tabName === 'node-tab') {
+                loadNodeInfo();
+            }
+        }
+        
+        // 广播交易
+        document.getElementById('broadcast-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const txHex = document.getElementById('tx-hex').value.trim();
+            if (!txHex) {
+                showResult('请输入交易数据', false);
+                return;
+            }
+            
+            const nodeType = document.getElementById('node-type').value;
+            
+            fetch('/api/broadcast', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    tx_hex: txHex,
+                    node_type: nodeType
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResult(`交易广播成功！<br>交易ID: ${data.txid}<br>使用节点: ${data.node_used || '未知'}<br><a href="https://mempool.space/testnet/tx/${data.txid}" target="_blank">在区块浏览器中查看</a>`, true);
+                } else {
+                    showResult(`交易广播失败: ${data.error}<br>使用节点: ${data.node_used || '未知'}`, false);
+                }
+            })
+            .catch(error => {
+                showResult(`发生错误: ${error}`, false);
+            });
+        });
+        
+        // 解析交易
+        document.getElementById('decode-btn').addEventListener('click', function() {
+            const txHex = document.getElementById('tx-hex').value.trim();
+            if (!txHex) {
+                showDecodeResult('请输入交易数据');
+                return;
+            }
+            
+            const nodeType = document.getElementById('node-type').value;
+            
+            fetch('/api/decode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    tx_hex: txHex,
+                    node_type: nodeType
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let resultHtml = `<div style="margin-bottom: 10px; font-weight: bold;">使用节点: ${data.node_used || '未知'}</div>`;
+                    resultHtml += formatTransaction(data.transaction);
+                    showDecodeResult(resultHtml);
+                } else {
+                    showDecodeResult(`解析失败: ${data.error}<br>使用节点: ${data.node_used || '未知'}`);
+                }
+            })
+            .catch(error => {
+                showDecodeResult(`发生错误: ${error}`);
+            });
+        });
+        
+        // 加载节点信息
+        function loadNodeInfo() {
+            fetch('/api/node_info')
+            .then(response => response.json())
+            .then(data => {
+                const nodeInfoDiv = document.getElementById('node-info');
+                if (data.success) {
+                    nodeInfoDiv.innerHTML = `
+                        <p><strong>网络:</strong> ${data.network}</p>
+                        <p><strong>区块高度:</strong> ${data.blocks}</p>
+                        <p><strong>区块头数量:</strong> ${data.headers}</p>
+                        <p><strong>同步进度:</strong> ${(data.verification_progress * 100).toFixed(2)}%</p>
+                        <p><strong>连接方式:</strong> ${data.connection_type}</p>
+                    `;
+                } else {
+                    nodeInfoDiv.innerHTML = `<p>获取节点信息失败: ${data.error}</p>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('node-info').innerHTML = `<p>发生错误: ${error}</p>`;
+            });
+        }
+        
+        // 刷新节点信息
+        document.getElementById('refresh-node-info').addEventListener('click', loadNodeInfo);
+        
+        // 显示广播结果
+        function showResult(message, isSuccess) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.className = isSuccess ? 'result success' : 'result error';
+            resultDiv.classList.remove('hidden');
+            document.getElementById('decode-result').classList.add('hidden');
+        }
+        
+        // 显示解析结果
+        function showDecodeResult(message) {
+            const decodeResultDiv = document.getElementById('decode-result');
+            decodeResultDiv.innerHTML = message;
+            decodeResultDiv.classList.remove('hidden');
+            document.getElementById('result').classList.add('hidden');
+        }
+        
+        // 格式化交易信息
+        function formatTransaction(tx) {
+            let html = `<h3>交易详情</h3>`;
+            html += `<p><strong>交易ID:</strong> ${tx.txid}</p>`;
+            html += `<p><strong>版本:</strong> ${tx.version}</p>`;
+            html += `<p><strong>锁定时间:</strong> ${tx.locktime}</p>`;
+            html += `<p><strong>大小:</strong> ${tx.size} 字节</p>`;
+            html += `<p><strong>输入数量:</strong> ${tx.vin.length}</p>`;
+            html += `<p><strong>输出数量:</strong> ${tx.vout.length}</p>`;
+            
+            html += `<h4>输入:</h4>`;
+            tx.vin.forEach((input, index) => {
+                html += `<div style="margin-bottom: 10px; padding: 5px; border-left: 3px solid #f7931a;">`;
+                html += `<p><strong>输入 #${index}:</strong></p>`;
+                if (input.coinbase) {
+                    html += `<p>Coinbase: ${input.coinbase}</p>`;
+                } else {
+                    html += `<p>前一交易ID: ${input.txid}</p>`;
+                    html += `<p>输出索引: ${input.vout}</p>`;
+                    html += `<p>序列号: ${input.sequence}</p>`;
+                }
+                html += `</div>`;
+            });
+            
+            html += `<h4>输出:</h4>`;
+            tx.vout.forEach((output, index) => {
+                html += `<div style="margin-bottom: 10px; padding: 5px; border-left: 3px solid #28a745;">`;
+                html += `<p><strong>输出 #${index}:</strong></p>`;
+                html += `<p>金额: ${output.value} BTC</p>`;
+                html += `<p>地址: ${output.scriptPubKey.addresses ? output.scriptPubKey.addresses.join(', ') : '无地址'}</p>`;
+                html += `<p>类型: ${output.scriptPubKey.type}</p>`;
+                html += `</div>`;
+            });
+            
+            return html;
+        }
+    </script>
+</body>
+</html>
