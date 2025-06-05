@@ -1,0 +1,11 @@
+[package]
+name = "homework"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bitcoin = "0.31"
+secp256k1 = "0.28"
+hex = "0.4"
+sha2 = "0.10"
+rand = "0.8"
