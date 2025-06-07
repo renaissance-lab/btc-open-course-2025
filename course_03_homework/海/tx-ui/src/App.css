@@ -1,0 +1,125 @@
+.App {
+  text-align: center;
+}
+
+.App-header {
+  background-color: #1a1a2e; /* 深色调的蓝色 */
+  min-height: 8vh;
+  display: flex; /* 使用flex布局 */
+  align-items: center; /* 垂直居中 */
+  padding: 0 20px; /* 添加一些内边距 */
+}
+
+.App-logo {
+  height: 50px; /* 使用固定高度 */
+  pointer-events: none; /* 禁用鼠标事件 */
+  margin-right: 150px; /* 在logo和文本之间添加右边距 */
+}
+
+.App-main {
+  background-color: #272747; /* 深色调的紫色 */
+  min-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: #c0c0c0; /* 银色字体 */
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.App-nav {
+  display: flex; /* 启用flex布局 */
+  align-items: center; /* 垂直居中 */
+  justify-content: space-between; /* 两端对齐 */
+}
+
+.App-menuButton {
+  background: none; /* 移除背景 */
+  border: none; /* 移除边框 */
+  color: white; /* 设置文字颜色为白色 */
+  font-size: 20px; /* 增大字体大小 */
+  cursor: pointer; /* 鼠标悬停时显示手形图标 */
+  padding: 10px; /* 添加内边距 */
+  transition: background-color 0.3s; /* 添加背景色过渡效果 */
+   margin-right: 50px; /* 在菜单按钮之间添加200px的右边距 */
+}
+
+.App-searchInput {
+  width: 200px; /* 设置输入框宽度 */
+  padding: 5px 10px; /* 设置内边距 */
+  font-size: 16px; /* 设置字体大小 */
+  border: 1px solid #ccc; /* 设置边框 */
+  border-radius: 4px; /* 设置圆角 */
+  margin-left: auto; /* 使输入框靠右对齐 */
+}
+
+.App-broadcastButtonContainer {
+  order: 0; /* 确保广播按钮在最左边 */
+}
+
+.App-searchContainer {
+  display: flex; /* 启用flex布局 */
+  align-items: center; /* 垂直居中 */
+}
+
+.App-searchButton {
+  background-color: #007bff; /* 蓝色背景 */
+  color: white; /* 白色字体 */
+  border: none; /* 无边框 */
+  padding: 5px 10px; /* 内边距 */
+  font-size: 16px; /* 字体大小 */
+  cursor: pointer; /* 鼠标悬停时显示手形图标 */
+  border-radius: 4px; /* 圆角 */
+  margin-left: 10px; /* 与输入框的间距 */
+}
+
+.App-searchButton:hover {
+  background-color: #0056b3; /* 鼠标悬停时的背景色 */
+}
+
+.App-main {
+    position: relative;
+    padding: 20px;
+}
+
+.App-inputContainer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.App-textarea {
+    width: 600px;
+    height: 100px;
+    margin-bottom: 10px;
+    padding: 100px;
+    font-size: 16px;
+}
+
+.App-sendButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50; /* 绿色背景 */
+    color: white; /* 白色文字 */
+    border: none; /* 无边框 */
+    border-radius: 5px; /* 圆角边框 */
+    width: 100px; /* 自动宽度，根据内容调整 */
+    height: 40px; /* 设置按钮高度 */
+    margin-top: 10px; /* 与文本框的间距 */
+}
