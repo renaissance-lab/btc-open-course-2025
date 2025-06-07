@@ -51,7 +51,7 @@ def three_input_address_transaction():
         script_list = [taproot_script, segwit_script, legacy_script]
 
         taproot_sig = private_key.sign_taproot_input(tx, 0, script_list, amount_list)
-        segwit_sig = private_key.sign_segwit_input(tx, 1, segwit_script, trans_value_seg)
+        segwit_sig = private_key.sign_segwit_input(tx, 1, public_key.get_address().to_script_pub_key(), trans_value_seg)
         legacy_sig = private_key.sign_input(tx, 2, legacy_script)
 
         tx_inputs[0].script_sig = Script([])
