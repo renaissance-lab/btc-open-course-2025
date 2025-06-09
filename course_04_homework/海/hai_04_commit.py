@@ -1,6 +1,8 @@
 from bitcoinutils.setup import setup
 from bitcoinutils.keys import PrivateKey
 from bitcoinutils.script import Script
+from bitcoinutils.transactions import Sequence
+from bitcoinutils.constants import TYPE_RELATIVE_TIMELOCK
 
 import hashlib
 
@@ -21,26 +23,37 @@ def main():
     hash1 = hashlib.sha256(b'hellohai').hexdigest()
     script1 = Script(['OP_SHA256', hash1, 'OP_EQUALVERIFY', 'OP_TRUE'])
 
+    priv_A = PrivateKey("cQmHDjVN9vyySsterdh5aLMsHP4iWqbg6q2z9KdYxiC7G8VwWMiy")
+    priv_B = PrivateKey("cUy4pzV9gQoog9Cfhr4JaMCpqkLaa7YAcg9xwuuEktT3PSkTDp3t")
+    priv_C = PrivateKey("cNiGt5Q88aBEzqYd9sVtx8G45bigZ7ScZ6o5aD5zzcaBweHcW2qH")
+
     # 构造多签脚本 (2-of-3)
-    pubkey_A = "02fa38a691fd5b04906cc9fe125d0c5cc71fb0ee56fb99fc2ba5c438ad0a51e6a3"
-    pubkey_B = "02174ec79e7a49299712cab443d2a59211c82ffe1656bee8e633434b90b0641b81"
-    pubkey_C = "03bf1e677d227500bab16b49b8acc287590f4a33aa0af27b4113fc5a6cd3f40017"
+    pubkey_A_hex = priv_A.get_public_key().to_x_only_hex()
+    pubkey_B_hex = priv_B.get_public_key().to_x_only_hex()
+    pubkey_C_hex = priv_C.get_public_key().to_x_only_hex()
+
     multi_2_of_3_script = Script([
-        'OP_2',
-        pubkey_A, pubkey_B, pubkey_C,
-        'OP_3',
-        'OP_CHECKMULTISIG'
+        "OP_0",
+        pubkey_A_hex, 
+        "OP_CHECKSIGADD",
+        pubkey_B_hex, 
+        "OP_CHECKSIGADD",
+        pubkey_C_hex,
+        "OP_CHECKSIGADD",
+        "OP_2", 
+        "OP_EQUAL"
     ])
 
-    timelock = 6*1
+
+    timelock = 6*10
+    seq_time = Sequence(TYPE_RELATIVE_TIMELOCK,timelock)
     # 时间锁定脚本
     timelock_script = Script([
-        'OP_IF',
-            timelock,
-            'OP_CHECKSEQUENCEVERIFY',
-            alice_pub.to_hex(),
-            'OP_CHECKSIG',
-        'OP_ENDIF'
+        seq_time.for_script(),
+        "OP_CHECKSEQUENCEVERIFY",
+        "OP_DROP",
+        alice_pub.to_x_only_hex(),
+        "OP_CHECKSIG",
     ])
 
     # 构建Merkle树

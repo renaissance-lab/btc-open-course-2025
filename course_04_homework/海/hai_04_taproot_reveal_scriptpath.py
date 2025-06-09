@@ -1,8 +1,9 @@
 from bitcoinutils.setup import setup
 from bitcoinutils.keys import PrivateKey
 from bitcoinutils.script import Script
-from bitcoinutils.transactions import Transaction, TxInput, TxOutput, TxWitnessInput
+from bitcoinutils.transactions import Transaction, TxInput, TxOutput, TxWitnessInput,Sequence
 from bitcoinutils.utils import ControlBlock
+from bitcoinutils.constants import TYPE_RELATIVE_TIMELOCK
 import hashlib
 
 def main():
@@ -47,15 +48,15 @@ def main():
         "OP_EQUAL"
     ])
 
-    timelock = 6*1
+    timelock = 6*10
+    seq_time = Sequence(TYPE_RELATIVE_TIMELOCK,timelock)
     # 时间锁定脚本
     timelock_script = Script([
-        'OP_IF',
-            timelock,
-            'OP_CHECKSEQUENCEVERIFY',
-            alice_pub.to_hex(),
-            'OP_CHECKSIG',
-        'OP_ENDIF'
+        seq_time.for_script(),
+        "OP_CHECKSEQUENCEVERIFY",
+        "OP_DROP",
+        alice_pub.to_x_only_hex(),
+        "OP_CHECKSIG",
     ])
 
     # 构建Merkle树
@@ -65,7 +66,7 @@ def main():
     from_address = alice_pub.get_taproot_address(tree)
     print("正在花费Taproot地址：", from_address.to_string())
 
-    txid = "75eee7144b6c90e9c887800e07e2c092d2f640da5c6835b4b16add8dda2e30ab"
+    txid = "c9b74a5750ba96d1c72bdeaea16d35449f43285b85993ba30c698a55f2a34c83"
     vout = 0
     amount = 700
 
@@ -81,11 +82,16 @@ def main():
 
     sig_A = priv_A.sign_taproot_input(tx, 0, [from_address.to_script_pub_key()], [amount],
                                       script_path=True,tapleaf_script=multi_2_of_3_script,tweak=False)
+    
     sig_B = priv_B.sign_taproot_input(tx, 0, [from_address.to_script_pub_key()], [amount],
+                                      script_path=True,tapleaf_script=multi_2_of_3_script,tweak=False)
+    
+    sig_C = priv_C.sign_taproot_input(tx, 0, [from_address.to_script_pub_key()], [amount],
                                       script_path=True,tapleaf_script=multi_2_of_3_script,tweak=False)
 
     tx.witnesses.append(
         TxWitnessInput([
+            "",
             sig_B,
             sig_A,
             multi_2_of_3_script.to_hex(),
