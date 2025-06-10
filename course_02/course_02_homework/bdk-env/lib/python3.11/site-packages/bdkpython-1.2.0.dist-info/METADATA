@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: bdkpython
+Version: 1.2.0
+Summary: The Python language bindings for the Bitcoin Development Kit
+Home-page: https://github.com/bitcoindevkit/bdk-ffi
+Author: Bitcoin Dev Kit Developers <dev@bitcoindevkit.org>
+License: MIT or Apache 2.0
+Description-Content-Type: text/markdown
+
+# bdkpython
+The Python language bindings for the [Bitcoin Dev Kit](https://github.com/bitcoindevkit).
+
+## Install the package
+```shell
+pip install bdkpython
+```
+
+## Simple example
+```python
+from bdkpython import Wallet
+```

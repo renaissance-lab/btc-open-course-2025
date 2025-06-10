@@ -1,0 +1,77 @@
+观察legacy、segwit和taproot 锁定脚本（scriptpubkey)的长短，说说他们有什么区别
+
+
+一、三种锁定脚本结构与长度对比
+类型	脚本结构（ASM）	                                字节数	    描述
+Legacy	OP_DUP OP_HASH160 <20-byte pubkeyhash>
+         OP_EQUALVERIFY OP_CHECKSIG	                25 字节	    Pay to PubKey Hash (P2PKH)
+SegWit	0 <20-byte pubkeyhash>	                    22 字节	    Pay to Witness PubKey Hash (P2WPKH)
+Taproot	OP_1 <32-byte pubkey>	                    34 字节	    Pay to Taproot (P2TR)
+
+二、结构解读与长度来源
+1. Legacy (P2PKH)
+OP_DUP OP_HASH160 <pubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
+5 个操作符
+pubKeyHash 为 20 字节
+每个操作符 1 字节 + OP_PUSH 20
+总共 25 字节
+示例：	
+ScriptPubKey (ASM)	OP_DUP
+OP_HASH160
+OP_PUSHBYTES_20 674a8527a29f25613552267d0edfd181212becdc
+OP_EQUALVERIFY
+OP_CHECKSIG
+ScriptPubKey (HEX)	76a914674a8527a29f25613552267d0edfd181212becdc88ac
+Type	P2PKH
+
+2. SegWit (P2WPKH)
+OP_0 <20-byte pubkeyHash>
+OP_0 表示 witness version = 0
+OP_PUSH 20 后接 20 字节 pubKeyHash
+总共 22 字节
+示例：
+ScriptPubKey (ASM)	OP_0
+OP_PUSHBYTES_20 09e4581b5a796feffc1c4f0669206e801cb7a9eb
+ScriptPubKey (HEX)	001409e4581b5a796feffc1c4f0669206e801cb7a9eb
+Type	V0_P2WPKH
+
+3. Taproot (P2TR)
+OP_1 <32-byte x-only pubkey>
+OP_1 表示 witness version = 1（Taproot）
+OP_PUSH 32 后接 32 字节的公钥
+总共 34 字节
+示例：	
+ScriptPubKey (ASM)	OP_PUSHNUM_1
+OP_PUSHBYTES_32 36a003a0eb17a718a026d0917c2dc9657e892cdab23c57ba1b4edb88d50b19f4
+ScriptPubKey (HEX)	512036a003a0eb17a718a026d0917c2dc9657e892cdab23c57ba1b4edb88d50b19f4
+Type	V1_P2TR
+
+4. P2SH 地址 3开头
+scriptPubKey 格式
+OP_HASH160 <20-byte redeemScript hash> OP_EQUAL
+总长度：23 字节
+是一种“间接支付”，实际的支出逻辑由 redeemScript 决定。
+示例：
+ScriptPubKey (ASM)	OP_HASH160
+OP_PUSHBYTES_20 c4edfad1b4d604fd57b223d9353712cb4d1dbfdf
+OP_EQUAL
+ScriptPubKey (HEX)	a914c4edfad1b4d604fd57b223d9353712cb4d1dbfdf87
+Type	P2SH
+
+三、区别总结
+项目	                Legacy (P2PKH)	    SegWit (P2WPKH)	    Taproot (P2TR)
+scriptPubKey 字节数	    25 字节	            22 字节	                34 字节
+witness 部分	        无	                有，见证数据压缩	        有，支持 Schnorr 签名
+结构复杂度	                高	            中等	                最简单（未来可扩展）
+支持多签/脚本	            有，但效率低	    有但有限	            最强，支持 MAST 和条件逻辑
+手续费	                    高	            中等	                最低（因结构优化）
+
+
+额外说明
+Taproot scriptPubKey 虽然最长，但整体交易大小（vsize）通常最小，因为 witness 更小，签名为 Schnorr（比 ECDSA 更紧凑）。
+
+Legacy 最长，是传统脚本，功能弱且效率低。
+
+SegWit 是过渡方案，广泛兼容 Legacy 系统，性能明显提升。
+
+Taproot 是下一代升级，设计为高隐私、低成本、强拓展性。
