@@ -40,5 +40,3 @@ if __name__ == "__main__":
     print('legacy地址：',address['legacy'])
     print('segwit地址：',address['segwit'])
     print('Taproot地址：',address['taproot'])
-
-
