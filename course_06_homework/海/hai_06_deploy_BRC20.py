@@ -3,33 +3,26 @@ from bitcoinutils.script import Script
 from bitcoinutils.transactions import Transaction, TxInput, TxOutput, TxWitnessInput
 from bitcoinutils.keys import PrivateKey
 from bitcoinutils.utils import ControlBlock
-import os
+import json
 
-def generate_pushdata2_sequence(hex_data, max_chunk_size=520):
+def create_brc20_deploy_script(tick, max_supply, limit_per_mint,pubkey):
     """
-    生成十六进制数据块的列表
-    
-    参数:
-        hex_data (str): 图片HEX字符串（如"89504e47..."）
-        max_chunk_size (int): 每块最大字节数（默认520）
-    
-    返回:
-        list: 十六进制数据块列表
+    创建BRC-20代币部署脚本
+    :param tick: 代币符号(4个字符)
+    :param max_supply: 最大供应量
+    :param limit_per_mint: 每次铸造限制
+    :return: 脚本对象
     """
-    # 按520字节拆分HEX数据（每2个HEX字符=1字节）
-    return [
-        hex_data[i:i+max_chunk_size*2]
-        for i in range(0, len(hex_data), max_chunk_size*2)
-    ]
+    # 准备BRC-20部署数据
+    deploy_data = {
+        "p": "brc-20",
+        "op": "deploy",
+        "tick": tick,
+        "max": str(max_supply),
+        "lim": str(limit_per_mint)
+    }
+    deploy_json = json.dumps(deploy_data, separators=(',', ':'))
 
-def create_nft_deploy_script(imgpath, pubkey):
-    with open(imgpath, 'rb') as f:
-        img = f.read()
-
-    # 获取十六进制数据块列表
-    data_chunks = generate_pushdata2_sequence(img.hex(), max_chunk_size=520)
-    
-    # 构建脚本 - 注意每个数据块需要单独处理
     script = Script([
         pubkey.to_x_only_hex(),
         'OP_CHECKSIG',
@@ -39,7 +32,7 @@ def create_nft_deploy_script(imgpath, pubkey):
             'OP_1',
             b'text/plain;charset=utf-8'.hex(),  
             'OP_0',
-            *data_chunks,  # 展开所有数据块
+            deploy_json.encode('utf-8').hex(),  
         'OP_ENDIF'
     ])
     
@@ -56,16 +49,14 @@ def create_deploy_transaction():
     # tb1pwdygg20pkgg5rus0jg59tgjz3sltcqpv2pafl7g9udmuekv7rn2sryhecg
     print("taproot地址：", own_address.to_string())
 
-    basePath = os.path.dirname(os.path.abspath(__file__))
-    imgpath = os.path.join(basePath,"hai_06_leaf.JPG")
-    # 创建NFT部署脚本
-    script = create_nft_deploy_script(imgpath, pubkey)
+    # 创建BRC-20部署脚本
+    script = create_brc20_deploy_script("DIAO", 21000, 100, pubkey)
 
     tree = [script]
     tree_address = pubkey.get_taproot_address(tree)
     print("tree taprootd地址:", tree_address.to_string())
     
-    tx_input = TxInput("a8f50ffb78bb3a11ac07c7145ae5daa2889635b2a74c6a2df11dbca749e6edd3", 0)
+    tx_input = TxInput("036be90a2afbf736d0a2b321509627c625d42df5b2797eb74289cc2c03781be0", 0)
     
     tx_output = TxOutput(546, own_address.to_script_pub_key())
     tx_change = TxOutput(800 - 546 - 0, own_address.to_script_pub_key())
@@ -74,7 +65,7 @@ def create_deploy_transaction():
     tx = Transaction(inputs=[tx_input], outputs=[tx_output], has_segwit=True)
     
     # 签名交易
-    sig = privkey.sign_taproot_input(tx, 0, [tree_address.to_script_pub_key()], [5000],
+    sig = privkey.sign_taproot_input(tx, 0, [tree_address.to_script_pub_key()], [800],
                                       script_path=True, tapleaf_script=script, tweak=False)
 
     cb = ControlBlock(pubkey, tree, 0, is_odd=tree_address.is_odd())
@@ -92,7 +83,6 @@ def create_deploy_transaction():
 if __name__ == "__main__":
     # 创建并打印部署交易
     deploy_tx = create_deploy_transaction()
-    print("\nNFT部署交易:")
+    print("\nBRC-20部署交易:")
     print("Raw Hex:", deploy_tx.serialize())
-    print("\ntx size: ", deploy_tx.get_size())
     print("\nTxID:", deploy_tx.get_txid())
