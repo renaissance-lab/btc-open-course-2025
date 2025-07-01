@@ -1,0 +1,15 @@
+csv time lock:
+sendrawtransaction RPC error: {"code":-26,"message":"non-BIP68-final"} 
+时间未到期
+
+sendrawtransaction RPC error: {"code":-26,"message":"mandatory-script-verify-flag-failed 
+(Locktime requirement not satisfied)"}
+transaction input sequence字段设置错误
+
+sendrawtransaction RPC error: {"code":-26,"message":"mandatory-script-verify-flag-failed 
+(Witness program hash mismatch)"}
+Witness字段里面有错误，检查control block, sign_taproot_input, TxWitnessInput
+
+
+Taproot uses 32-byte x-only public keys (no y-coordinate)
+OP_CHECKMULTISIG opcode is not supported, use OP_CHECKSINGADD instead.
