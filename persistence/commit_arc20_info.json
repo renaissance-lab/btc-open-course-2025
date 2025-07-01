@@ -1,0 +1,15 @@
+{
+  "commit_txid": "000000e586e68003cb6213a65cafe1970e025bc8d66d807f2bef3699addfae79",
+  "temp_address": "tb1pwf7nn3weukj4xpqjdcmcqg3v2ygted7074clnewwnc4rmqdejlcs2v580t",
+  "key_path_address": "tb1p647tfurqxqauaae4klwkwsaljn7yueg2692hasmp4a082cdtm4yqk2895f",
+  "inscription_amount": 1046,
+  "operation": "arc20_mint",
+  "protocol": "atom",
+  "op_type": "dmt",
+  "mint_ticker": "sophon",
+  "bitworkc": "000000",
+  "bitworkr": "6238",
+  "time": 1751340382,
+  "nonce": 0,
+  "payload_hex": "a16461726773a56474696d651a6863555e656e6f6e63650068626974776f726b636630303030303068626974776f726b7264363233386b6d696e745f7469636b657266736f70686f6e"
+}
